@@ -23,7 +23,7 @@ awk -v host=$HOST '
      { if (!/nagios/ && !/Zabbix/ && !/Varnish/) 
        if (/" 20[0-9] /) error20x++
        else if (/- 30[0-9] /) error30x++ 
-       else if (/- 40[0-9] /) error40x++
+       else if (/- 4[0-1][0-9] /) error40x++
        else if (/- 50[0-9] /) error50x++
      }  
     END { 
