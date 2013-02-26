@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export version="1.0" date="26.02.13" time="14.26">
+  <hosts>
+    <host name="Template_S4YElasticSearch">
+      <proxy_hostid>0</proxy_hostid>
+      <useip>1</useip>
+      <dns></dns>
+      <ip>127.0.0.1</ip>
+      <port>10050</port>
+      <status>3</status>
+      <useipmi>0</useipmi>
+      <ipmi_ip>127.0.0.1</ipmi_ip>
+      <ipmi_port>623</ipmi_port>
+      <ipmi_authtype>0</ipmi_authtype>
+      <ipmi_privilege>2</ipmi_privilege>
+      <ipmi_username></ipmi_username>
+      <ipmi_password></ipmi_password>
+      <groups>
+        <group>Templates</group>
+      </groups>
+      <triggers>
+        <trigger>
+          <description>Port ElasticSearch TCP/9200 Down</description>
+          <type>0</type>
+          <expression>{Template_S4YElasticSearch:net.tcp.listen[9200].last(0)}=0</expression>
+          <url></url>
+          <status>0</status>
+          <priority>4</priority>
+          <comments></comments>
+        </trigger>
+        <trigger>
+          <description>Process ElasticSearch Down</description>
+          <type>0</type>
+          <expression>{Template_S4YElasticSearch:proc.num[,elasticsearch,,-Delasticsearch].last(0)}=0</expression>
+          <url></url>
+          <status>0</status>
+          <priority>4</priority>
+          <comments>Aplicacao essensial para o ambiente do Graylog2, sem ela o server não terá onde salvar as mensagens de log.&#13;
+O graylog2-server  salva as mensagens no elasticsearch, e o graylog2-web usa o elasticsearch</comments>
+        </trigger>
+        <trigger>
+          <description>ElasticSearch Index Graylog2 Stats with problem!</description>
+          <type>0</type>
+          <expression>{Template_S4YElasticSearch:web.page.regexp[localhost,"/graylog2/_stats?pretty=true",9200,true].str("true")}=0</expression>
+          <url></url>
+          <status>0</status>
+          <priority>4</priority>
+          <comments>curl -s -XGET 'http://localhost:9200/graylog2/_stats?pretty=true'|grep 'ok'&#13;
+Ok status:   "ok" : true,</comments>
+        </trigger>
+        <trigger>
+          <description>ElasticSearch Cluster Status with Problem!</description>
+          <type>0</type>
+          <expression>{Template_S4YElasticSearch:web.page.regexp[localhost,"/_cluster/health?pretty=true",9200,yellow].str("yellow")}=0</expression>
+          <url></url>
+          <status>0</status>
+          <priority>4</priority>
+          <comments>curl -XGET 'http://localhost:9200/_cluster/health?pretty=true'&#13;
+Ok status: yellow or green</comments>
+        </trigger>
+      </triggers>
+      <items>
+        <item type="7" key="net.tcp.listen[9200]" value_type="3">
+          <description>Port ElasticSearch TCP/$1</description>
+          <ipmi_sensor></ipmi_sensor>
+          <delay>60</delay>
+          <history>3</history>
+          <trends>15</trends>
+          <status>0</status>
+          <data_type>0</data_type>
+          <units></units>
+          <multiplier>0</multiplier>
+          <delta>0</delta>
+          <formula>1</formula>
+          <lastlogsize>0</lastlogsize>
+          <logtimefmt></logtimefmt>
+          <delay_flex></delay_flex>
+          <authtype>0</authtype>
+          <username></username>
+          <password></password>
+          <publickey></publickey>
+          <privatekey></privatekey>
+          <params></params>
+          <trapper_hosts></trapper_hosts>
+          <snmp_community></snmp_community>
+          <snmp_oid></snmp_oid>
+          <snmp_port>161</snmp_port>
+          <snmpv3_securityname></snmpv3_securityname>
+          <snmpv3_securitylevel>0</snmpv3_securitylevel>
+          <snmpv3_authpassphrase></snmpv3_authpassphrase>
+          <snmpv3_privpassphrase></snmpv3_privpassphrase>
+          <valuemapid>0</valuemapid>
+          <applications>
+            <application>ElasticSearchApp</application>
+          </applications>
+        </item>
+        <item type="7" key="net.tcp.listen[9300]" value_type="3">
+          <description>Port ElasticSearch TCP/$1</description>
+          <ipmi_sensor></ipmi_sensor>
+          <delay>60</delay>
+          <history>3</history>
+          <trends>15</trends>
+          <status>0</status>
+          <data_type>0</data_type>
+          <units></units>
+          <multiplier>0</multiplier>
+          <delta>0</delta>
+          <formula>1</formula>
+          <lastlogsize>0</lastlogsize>
+          <logtimefmt></logtimefmt>
+          <delay_flex></delay_flex>
+          <authtype>0</authtype>
+          <username></username>
+          <password></password>
+          <publickey></publickey>
+          <privatekey></privatekey>
+          <params></params>
+          <trapper_hosts></trapper_hosts>
+          <snmp_community></snmp_community>
+          <snmp_oid></snmp_oid>
+          <snmp_port>161</snmp_port>
+          <snmpv3_securityname></snmpv3_securityname>
+          <snmpv3_securitylevel>0</snmpv3_securitylevel>
+          <snmpv3_authpassphrase></snmpv3_authpassphrase>
+          <snmpv3_privpassphrase></snmpv3_privpassphrase>
+          <valuemapid>0</valuemapid>
+          <applications>
+            <application>ElasticSearchApp</application>
+          </applications>
+        </item>
+        <item type="7" key="proc.num[,elasticsearch,,-Delasticsearch]" value_type="3">
+          <description>Process ElasticSearch</description>
+          <ipmi_sensor></ipmi_sensor>
+          <delay>60</delay>
+          <history>3</history>
+          <trends>7</trends>
+          <status>0</status>
+          <data_type>0</data_type>
+          <units></units>
+          <multiplier>0</multiplier>
+          <delta>0</delta>
+          <formula>1</formula>
+          <lastlogsize>0</lastlogsize>
+          <logtimefmt></logtimefmt>
+          <delay_flex></delay_flex>
+          <authtype>0</authtype>
+          <username></username>
+          <password></password>
+          <publickey></publickey>
+          <privatekey></privatekey>
+          <params></params>
+          <trapper_hosts></trapper_hosts>
+          <snmp_community></snmp_community>
+          <snmp_oid></snmp_oid>
+          <snmp_port>161</snmp_port>
+          <snmpv3_securityname></snmpv3_securityname>
+          <snmpv3_securitylevel>0</snmpv3_securitylevel>
+          <snmpv3_authpassphrase></snmpv3_authpassphrase>
+          <snmpv3_privpassphrase></snmpv3_privpassphrase>
+          <valuemapid>0</valuemapid>
+          <applications>
+            <application>ElasticSearchApp</application>
+          </applications>
+        </item>
+        <item type="7" key="web.page.regexp[localhost,&quot;/graylog2/_stats?pretty=true&quot;,9200,true]" value_type="4">
+          <description>ElasticSearch Index Graylog2 Stats</description>
+          <ipmi_sensor></ipmi_sensor>
+          <delay>60</delay>
+          <history>3</history>
+          <trends>15</trends>
+          <status>0</status>
+          <data_type>0</data_type>
+          <units></units>
+          <multiplier>0</multiplier>
+          <delta>0</delta>
+          <formula>1</formula>
+          <lastlogsize>0</lastlogsize>
+          <logtimefmt></logtimefmt>
+          <delay_flex></delay_flex>
+          <authtype>0</authtype>
+          <username></username>
+          <password></password>
+          <publickey></publickey>
+          <privatekey></privatekey>
+          <params></params>
+          <trapper_hosts></trapper_hosts>
+          <snmp_community></snmp_community>
+          <snmp_oid></snmp_oid>
+          <snmp_port>161</snmp_port>
+          <snmpv3_securityname></snmpv3_securityname>
+          <snmpv3_securitylevel>0</snmpv3_securitylevel>
+          <snmpv3_authpassphrase></snmpv3_authpassphrase>
+          <snmpv3_privpassphrase></snmpv3_privpassphrase>
+          <valuemapid>0</valuemapid>
+          <applications>
+            <application>ElasticSearchApp</application>
+          </applications>
+        </item>
+        <item type="7" key="web.page.regexp[localhost,&quot;/_cluster/health?pretty=true&quot;,9200,yellow]" value_type="4">
+          <description>ElasticSearch Cluster Status</description>
+          <ipmi_sensor></ipmi_sensor>
+          <delay>60</delay>
+          <history>3</history>
+          <trends>365</trends>
+          <status>0</status>
+          <data_type>0</data_type>
+          <units></units>
+          <multiplier>0</multiplier>
+          <delta>0</delta>
+          <formula>1</formula>
+          <lastlogsize>0</lastlogsize>
+          <logtimefmt></logtimefmt>
+          <delay_flex></delay_flex>
+          <authtype>0</authtype>
+          <username></username>
+          <password></password>
+          <publickey></publickey>
+          <privatekey></privatekey>
+          <params></params>
+          <trapper_hosts></trapper_hosts>
+          <snmp_community></snmp_community>
+          <snmp_oid></snmp_oid>
+          <snmp_port>161</snmp_port>
+          <snmpv3_securityname></snmpv3_securityname>
+          <snmpv3_securitylevel>0</snmpv3_securitylevel>
+          <snmpv3_authpassphrase></snmpv3_authpassphrase>
+          <snmpv3_privpassphrase></snmpv3_privpassphrase>
+          <valuemapid>0</valuemapid>
+          <applications>
+            <application>ElasticSearchApp</application>
+          </applications>
+        </item>
+      </items>
+      <templates/>
+      <graphs/>
+      <macros/>
+    </host>
+  </hosts>
+  <dependencies/>
+</zabbix_export>
