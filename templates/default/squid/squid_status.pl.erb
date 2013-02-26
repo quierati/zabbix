@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use IO::Socket;
+use File::Temp;
+use Shell qw(zabbix_sender);
+
+        my $host = 'localhost';
+        my $path = 'cache_object://localhost/info';
+        my $port = 3128;
+        my $tmp =  File::Temp->new(
+                        TEMPLATE => 'ztempXXXXX',
+                        SUFFIX => '.txt',
+			DIR => '/tmp');
+
+        my $CONN = IO::Socket::INET->new("$host:$port") or die "Connect Error: $!";
+        my $req = "GET $path HTTP/1.1\n\n";
+        $CONN->send($req) or die "Get Status Squid: $!";
+
+        open(my $ZTMP, ">", $tmp);
+
+        while (my $x = <$CONN>) {
+
+                if ($x =~ /Number of file desc currently in use:\s+(\d*)/) {
+                        print  $ZTMP "<%=node[:fqdn]%> descriptoruse $1\n";
+                }
+
+                if ($x =~ /Number of clients accessing cache:\s+(\d*)/) {
+                        print  $ZTMP "<%=node[:fqdn]%> accessclient $1\n";
+                }
+
+        }
+
+        $CONN->close;
+        close($ZTMP);
+
+	if ($ARGV[0]) {
+        	open DEBUG, "<$tmp";
+	        while (<DEBUG>) {
+        	  print $_;
+	        }
+        close(DEBUG);
+	}
+
+
+        zabbix_sender("-z <%= node[:zabbix][:server][:servername] %> -i $tmp") or die "Zabbix sender error: $!";
+        print "0\n";
+        exit 0;
+

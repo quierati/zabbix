@@ -1,0 +1,29 @@
+#!/bin/bash
+
+ZTMP=$(mktemp)
+trap "rm -f $ZTMP" 0
+HOST="<%= node[:fqdn] %>"
+IP="<%= node[:ipaddress] %>"
+
+[ $(echo $( $(type -p nginx) -V 2>&1)|grep -c 'with-http_stub_status_module') -ne 1 ] && echo 2 && exit 2
+
+
+NGINX_STATUS=$(curl -I -s $IP/status |head -1|grep -Po '[2-5]0[0-9]')
+if [ $NGINX_STATUS -ne 200 ] 
+   then
+	IP="localhost"
+	NGINX_STATUS=$(curl -I -s $IP/status |head -1|grep -Po '[2-5]0[0-9]')
+	[ $NGINX_STATUS -ne 200 ] && echo 3 && exit 3
+fi
+
+curl -s $IP/nginx_status | awk -v h=$HOST 'NR==1 {print h,"nginx_active",$3}; \
+                NR==3 {print h,"nginx_cons_accepts",$1"\n"h,"nginx_cons_handled",$2"\n"h,"nginx_requests",$3}; \
+                NR==4 {print h,"nginx_reading",$2"\n"h,"nginx_writing",$4"\n"h,"nginx_waiting",$6}' >> $ZTMP
+
+[ -z $1 ] || cat $ZTMP
+
+zabbix_sender -z <%=node[:zabbix][:server][:servername]%> -i $ZTMP &>/dev/null
+ZS=$?
+echo $?
+exit $?
+

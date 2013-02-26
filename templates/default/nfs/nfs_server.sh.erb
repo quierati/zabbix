@@ -1,0 +1,24 @@
+#!/bin/bash
+# apenas para ubuntu devido a opcao -l do nfsstat (descontinuado)
+# NFS Collect
+#
+# description: Script to collect NFS Server Stats and  send via Zabbix trapper
+# version: 1.0
+# scriptname: nfs_collect.sh
+# Labunix.com
+# Julio Quierati <julio.quierati@gmail.com>
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ZTMP=$(mktemp)
+HOST=$(hostname)
+trap "rm -f $ZTMP" 0
+
+nfsstat -s -4 -l|awk -v host=$HOST '!/-/ && !/^$/ { gsub (/:/,""); print host,$4,$5}' >> $ZTMP
+
+[ -z $1 ] || cat $ZTMP
+
+zabbix_sender -z <%=node[:zabbix][:server][:servername]%> -i $ZTMP >&-
+ZS=$?
+echo $?
+exit $?

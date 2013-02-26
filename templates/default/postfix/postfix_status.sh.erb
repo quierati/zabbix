@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Postfix Collect
+#
+# description: Script to collect stats postfix and  send via Zabbix trapper
+# version: 1.0
+# scriptname: postfix_collect.sh
+# depends: logtail pflogsumm
+# date: Mon Jan  7 16:59:57 BRST 2013
+# Labunix.com
+# Julio Quierati <julio.quierati@gmail.com>
+
+PATH=$PATH:/usr/sbin:/usr/bin
+MAILLOG=/var/log/mail.log
+LOGTMP=/tmp/mail.log.offset
+ZTMP=$(mktemp)
+HOST=$(hostname)
+FILA=$(mailq | tail -n1 | awk '{ print $5 }')
+OPTS="-q -h 0 -u 0 --bounce_detail=0 --deferral_detail=0 --reject_detail=0 --no_no_msg_size --smtp_detail=0 --smtpd_warning_detail=0"
+
+trap "rm -f $ZTMP" 0
+
+logtail2 -o $LOGTMP $MAILLOG|pflogsumm ${OPTS} |awk -vhost=$HOST 'NR>5 && NR<22 {gsub("(\(.\%\)|\/|k)","");print host,$2$3,$1}' > $ZTMP
+
+[ -z $FILA ] && FILA=0
+echo "$HOST fila $FILA" >> $ZTMP
+
+[ -z $1 ] || cat $ZTMP
+
+zabbix_sender -z <%= node[:zabbix][:server][:servername] %> -i $ZTMP >&-
+ZS=$?
+{ echo $ZS; exit $ZS; }
+

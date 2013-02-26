@@ -1,0 +1,23 @@
+Server=<%= node[:zabbix][:server][:servername] %>
+
+# Server port for sending active checks
+
+#ServerPort=10051
+
+# Unique hostname. Required for active checks.
+
+Hostname=<%= node[:agent][:hostname] %>
+
+Timeout=15
+
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+Include=/etc/zabbix/agentd.d/
+
+## 0 - debug is not created
+## 1 - critical information
+## 2 - error information
+## 3 - warnings
+## 4 - information (default)
+## 5 - for debugging (produces lots of information)
+LogFile=/var/log/zabbix-agent/zabbix_agentd.log
+#DebugLevel=3

@@ -1,0 +1,37 @@
+#!/bin/bash
+# 
+# RabbitMQ Queue 
+#
+# description: Script para verificar o tamanho das queue enviando os dados para o Zabbix
+# version: 1.0
+# scriptname: rabbitqueue_status.sh
+# depends: root
+# date: Tue Feb  7 19:23:20 BRST 2012
+# job: Labunix.com
+# by: Julio Quierati
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:
+ZTMP=$(mktemp)
+CMD="sudo rabbitmqctl"
+atexit() {
+        rm -f $ZTMP
+}
+trap atexit 0
+
+
+$CMD list_vhosts | egrep -v 'Listing|done' | xargs -i $CMD list_queues -p {} |egrep -v 'Listing|done' > $ZTMP
+[ ${PIPESTATUS[0]} -ne 0 ] && echo 1 && exit 1
+$CMD status|egrep 'total|vm_memory_limit'|sed 's/.*total/vm_memory_total_used/'|tr "," " "|tr -d '[\[\{\}]'|awk '{print $1,$2}' >> $ZTMP
+[ ${PIPESTATUS[0]} -ne 0 ] && echo 1 && exit 1
+
+sed -i 's/.*/<%= node[:fqdn] %> &/g' $ZTMP
+
+#DEBUG
+[ -z "$1" ] || cat $ZTMP
+#END
+
+zabbix_sender -z <%=node[:zabbix][:server][:servername]%> -i "$ZTMP" &> /dev/null
+ZS=${PIPESTATUS[0]}
+echo $ZS
+exit $ZS
+

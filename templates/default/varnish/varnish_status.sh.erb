@@ -1,0 +1,40 @@
+#!/bin/bash
+# 
+# Varnish Stats
+#
+# description: Script para verificar a Saude do Varnish enviando os dados para o Zabbix
+# version: 1.0
+# scriptname: varnish_status.sh
+# date: Tue May 15 16:41:54 BRT 2012
+# job: Labunix.com
+# by: Julio Quierati 
+
+ZTMP=$(mktemp)
+HOST="<%= node[:fqdn] %>"
+
+atexit() {
+        rm -f $ZTMP
+}
+trap atexit 0 1 3 9 15
+
+
+PID=$(pgrep -x -n varnishd)
+[ -z $PID ] && echo 1 && exit 1
+
+MMAP_COUNT=$(cat /proc/${PID}/maps|wc -l)
+[ $MMAP_COUNT -lt 1 ] && MMAP_COUNT=0
+
+echo "$HOST mmap_count $MMAP_COUNT" >> $ZTMP
+
+varnishstat -1 | awk -v host=$HOST '{print host,$1,$2}' >> $ZTMP
+
+#DEBUG
+[ -z $1 ] || cat $ZTMP
+#END
+
+zabbix_sender -z <%= node[:zabbix][:server][:servername] %> -s "<%= node[:fqdn] %>" -i $ZTMP &>/dev/null
+EXITCODE_SENDER=$?
+
+echo $EXITCODE_SENDER
+exit $EXITCODE_SENDER
+

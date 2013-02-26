@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# MySQL Slave Collect
+#
+# description: Script to collect the stats mysql slave and send via Zabbix trapper
+# version: 1.0
+# scriptname: mysql_slave_collect.sh
+# Labunix.com
+# Julio Quierati <julio.quierati@gmail.com>
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ZTMP=$(mktemp)
+HOST=$(hostname)
+
+trap "rm -f $ZTMP" 0
+
+mysql -uzab -p***** -e "show slave status" -E |awk -vhost=$HOST -F: '/(Seconds|Running)/ {gsub(/ */,""); gsub(/Yes/,"1"); gsub(/No/,"0"); print host,$1,$2}' > $ZTMP
+[ ${PIPESTATUS[0]} -ne 0 ] && { echo 1; exit 1; }
+
+[ -z $1 ] || cat $ZTMP
+
+zabbix_sender -z <%=node[:zabbix][:server][:servername]%> -i "$ZTMP" >&-
+ZS=$?
+{ echo $ZS; exit $ZS; }
+

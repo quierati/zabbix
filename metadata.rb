@@ -1,0 +1,5 @@
+maintainer       "Julio Quierati"
+maintainer_email "julio.quierati@gmail.com"
+license          "All rights reserved"
+description      "Installs/Configures zabbix"
+version          "1.0.0"

@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+# 
+# NFS Client Stat
+#
+# description: Script para coletar dados do NFS
+# version: 2.0
+# scriptname: nfsclient_status.pl
+# date: Thu Jul 26 19:34:22 BRT 2012
+# job: Labunix.com
+# by: Julio Quierati
+
+use strict;
+use File::Temp;
+use Shell qw(nfsstat zabbix_sender pgrep);
+use Env qw(PATH);
+
+$PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
+
+my @output;
+my %res;
+my @keys;
+my @values;
+my $line = 1;
+my $tmp = File::Temp->new(TEMPLATE => 'ztempXXXXX', SUFFIX => '.txt', DIR => '/tmp');
+my $host = "<%= node[:fqdn] %>";
+my $server = pgrep('-x nfsd');
+my $nfsv = pgrep('nfsv4');
+
+if ($nfsv) {
+    $nfsv = '-4';
+} else { 
+    $nfsv = '-3';
+}
+
+if ($server) {
+ 	@output = nfsstat('-s ' . $nfsv);
+} else {
+	@output = nfsstat($nfsv);
+}
+
+open(my $ZTMP, ">", $tmp);
+
+while($line < $#output) {
+  @keys = split /\s+/,$output[$line]; 
+  $output[$line+1] =~ s/\d+%//g;
+  @values = split /\s+/,$output[$line+1];
+  for(my $field=0;$field <= $#keys;$field++) {
+	  print $ZTMP "$host nfs.$keys[$field] $values[$field]\n";
+	  $res{$keys[$field]} = $values[$field];
+  }
+  $line+=2;
+}
+
+close($ZTMP);
+
+if ($ARGV[0]) {
+        open DEBUG, "<$tmp";
+        while (<DEBUG>) {
+          print $_;
+        }
+        close(DEBUG);
+}
+
+zabbix_sender("-z <%= node[:zabbix][:server][:servername] %> -i $tmp") or die "$!";
+print "0\n";
+
