@@ -28,8 +28,8 @@ parser.add_option('-s', '--statistic', dest='statistic', type='choice',
                   choices=['Average', 'Sum', 'SampleCount', 'Maximum', 'Minimum'],
                   default='Sum', help='Cloudwatch Statistic')
 parser.add_option('-a', '--account', dest='account', type='choice',
-                  choices=['shoes4you',''],
-                  default='shoes4you', help='Account')
+                  choices=['labunix',''],
+                  default='labunix', help='Account')
 parser.add_option('-i', '--interval', dest='interval',
                   default="60", help='Interval')
 (options, args) = parser.parse_args()

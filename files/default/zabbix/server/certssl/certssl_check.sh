@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TMOUT=10
-HOST=${1:-shoes4you.com.br}
+HOST=${1:-labunix.com}
 PORT=${2:-443}
 
 EXPIRES=$(timeout $TMOUT openssl s_client -host $HOST -port $PORT -showcerts  < /dev/null 2>/dev/null| sed -n '/BEGIN CERTIFICATE/,/END CERT/p' | openssl x509 -enddate -noout 2>/dev/null | sed -e 's/^.*\=//')
